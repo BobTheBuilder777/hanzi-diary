@@ -41,3 +41,22 @@ example
 # generated native folders
 /ios
 /android
+
+# Python tooling
+tools/venv/
+__pycache__/
+*.pyc
+
+# CC-CEDICT source data — re-downloadable, see README
+tools/data/
+
+# Generated database — rebuild with tools/build_dict.py
+*.db
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Claude Code local settings
+.claude/settings.local.json
