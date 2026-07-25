@@ -1,4 +1,5 @@
 import re
+import sqlite3
 
 
 def parse_line(line):
@@ -22,9 +23,38 @@ def parse_file(path):
                 entries.append(result)
             else:
                 failures.append(line)
-    return len(entries), len(failures)
+    return entries, failures
+
+def create_database(path):
+    connection = sqlite3.connect(path)
+    cursor = connection.cursor()
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS words (
+            id INTEGER PRIMARY KEY,
+            traditional TEXT,
+            simplified TEXT,
+            pinyin TEXT,
+            definition TEXT
+        )
+    """)
+    connection.commit()
+    connection.close()
+
+def insert_entries(path, entries):
+    connection = sqlite3.connect(path)
+    cursor = connection.cursor()
+    cursor.executemany(
+        "INSERT INTO words (traditional, simplified, pinyin, definition) VALUES (?, ?, ?, ?)",
+        entries
+    )
+    inserted = cursor.rowcount
+    connection.commit()
+    connection.close()
+    return inserted
 
 if __name__ == "__main__":
-    parsed, failed = parse_file("tools/data/cedict_1_0_ts_utf-8_mdbg.txt")
-    print(f"Parsed: {parsed}")
-    print(f"Failed: {failed}")
+    entries, failures = parse_file("tools/data/cedict_1_0_ts_utf-8_mdbg.txt")
+    create_database("tools/data/words.db")
+    inserted = insert_entries("tools/data/words.db", entries)
+    print(f"Inserted {inserted} entries")
