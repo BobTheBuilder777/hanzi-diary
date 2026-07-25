@@ -38,6 +38,7 @@ def create_database(path):
             definition TEXT
         )
     """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_simplified ON words (simplified)")
     connection.commit()
     connection.close()
 
