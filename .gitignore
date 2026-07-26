@@ -60,3 +60,6 @@ tools/data/
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Bundled dictionary — must ship with the app
+!assets/databases/words.db
