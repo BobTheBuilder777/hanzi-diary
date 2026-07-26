@@ -1,4 +1,5 @@
 import * as Device from 'expo-device';
+import { useSQLiteContext } from 'expo-sqlite';
 import { Platform, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -29,6 +30,8 @@ function getDevMenuHint() {
 }
 
 export default function HomeScreen() {
+  const db = useSQLiteContext();
+  console.log(db.getFirstSync("SELECT * FROM words WHERE simplified = '辣椒'"));
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
