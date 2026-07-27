@@ -1,6 +1,7 @@
 import * as Device from 'expo-device';
 import { useSQLiteContext } from 'expo-sqlite';
-import { Platform, StyleSheet } from 'react-native';
+import { useState } from 'react';
+import { Platform, StyleSheet, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AnimatedIcon } from '@/components/animated-icon';
@@ -29,9 +30,20 @@ function getDevMenuHint() {
   );
 }
 
+type Word = {
+  id: number;
+  traditional: string;
+  simplified: string;
+  pinyin: string;
+  definition: string;
+};
 export default function HomeScreen() {
   const db = useSQLiteContext();
-  console.log(db.getFirstSync("SELECT * FROM words WHERE simplified = '辣椒'"));
+  const [query, setQuery] = useState('')
+  const result = query
+    ? db.getFirstSync<Word>('SELECT * FROM words WHERE simplified = ?', [query])
+    : null;
+  console.log(result);
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
@@ -45,6 +57,21 @@ export default function HomeScreen() {
         <ThemedText type="code" style={styles.code}>
           get started
         </ThemedText>
+
+        <TextInput
+          style={styles.input}
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Type a character"
+        />
+
+        {result && (
+          <ThemedView type="backgroundElement" style={styles.result}>
+            <ThemedText type="title">{result.simplified}</ThemedText>
+            <ThemedText>{result.pinyin}</ThemedText>
+            <ThemedText>{result.definition}</ThemedText>
+          </ThemedView>
+        )}
 
         <ThemedView type="backgroundElement" style={styles.stepContainer}>
           <HintRow
@@ -90,6 +117,20 @@ const styles = StyleSheet.create({
   },
   code: {
     textTransform: 'uppercase',
+  },
+  input: {
+    alignSelf: 'stretch',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: Spacing.two,
+    padding: Spacing.three,
+    fontSize: 24,
+  },
+  result: {
+    alignSelf: 'stretch',
+    gap: Spacing.two,
+    padding: Spacing.three,
+    borderRadius: Spacing.four,
   },
   stepContainer: {
     gap: Spacing.three,
