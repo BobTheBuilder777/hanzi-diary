@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Platform, StyleSheet, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { HintRow } from '@/components/hint-row';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { WebBadge } from '@/components/web-badge';
@@ -39,10 +38,13 @@ type Word = {
 export default function HomeScreen() {
   const db = useSQLiteContext();
   const [query, setQuery] = useState('')
-  const result = query
-    ? db.getFirstSync<Word>('SELECT * FROM words WHERE simplified = ?', [query])
-    : null;
-  console.log(result);
+  const results = query
+    ? db.getAllSync<Word>(
+        'SELECT * FROM words WHERE simplified = ? OR pinyin_search = ? OR definition LIKE ? LIMIT 20',
+        [query, query.toLowerCase(), `%${query}%`]
+      )
+    : [];
+  console.log(results);
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
@@ -52,15 +54,17 @@ export default function HomeScreen() {
           value={query}
           onChangeText={setQuery}
           placeholder="Type a character"
+          autoCapitalize="none"
+          autoCorrect={false}
         />
 
-        {result && (
-          <ThemedView type="backgroundElement" style={styles.result}>
-            <ThemedText type="title">{result.simplified}</ThemedText>
-            <ThemedText>{result.pinyin}</ThemedText>
-            <ThemedText>{result.definition}</ThemedText>
+        {results.map((word) => (
+          <ThemedView key={word.id} type="backgroundElement" style={styles.result}>
+            <ThemedText type="title">{word.simplified}</ThemedText>
+            <ThemedText>{word.pinyin}</ThemedText>
+            <ThemedText>{word.definition}</ThemedText>
           </ThemedView>
-        )}
+        ))}
 
         {Platform.OS === 'web' && <WebBadge />}
       </SafeAreaView>

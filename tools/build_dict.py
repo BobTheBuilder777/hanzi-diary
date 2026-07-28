@@ -28,7 +28,7 @@ def parse_file(path):
     return entries, failures
 
 def normalize_pinyin(pinyin):
-    normalized = re.sub(r"\d", "",pinyin).replace(" ", "")
+    normalized = re.sub(r"\d", "",pinyin).replace(" ", "").lower()
     return normalized
 
 def create_database(path):
