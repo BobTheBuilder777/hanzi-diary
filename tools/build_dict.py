@@ -20,10 +20,16 @@ def parse_file(path):
                 continue
             result = parse_line(line)
             if result:
-                entries.append(result)
+                traditional, simplified, pinyin, definition = result
+                pinyin_search = normalize_pinyin(pinyin)
+                entries.append((traditional, simplified, pinyin, pinyin_search, definition))
             else:
                 failures.append(line)
     return entries, failures
+
+def normalize_pinyin(pinyin):
+    normalized = re.sub(r"\d", "",pinyin).replace(" ", "")
+    return normalized
 
 def create_database(path):
     connection = sqlite3.connect(path)
@@ -35,10 +41,12 @@ def create_database(path):
             traditional TEXT,
             simplified TEXT,
             pinyin TEXT,
+            pinyin_search TEXT,
             definition TEXT
         )
     """)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_simplified ON words (simplified)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_pinyin_search ON words (pinyin_search)")
     connection.commit()
     connection.close()
 
@@ -46,7 +54,7 @@ def insert_entries(path, entries):
     connection = sqlite3.connect(path)
     cursor = connection.cursor()
     cursor.executemany(
-        "INSERT INTO words (traditional, simplified, pinyin, definition) VALUES (?, ?, ?, ?)",
+        "INSERT INTO words (traditional, simplified, pinyin, pinyin_search, definition) VALUES (?, ?, ?, ?, ?)",
         entries
     )
     inserted = cursor.rowcount
