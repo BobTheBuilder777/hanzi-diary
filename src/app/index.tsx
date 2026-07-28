@@ -1,7 +1,7 @@
 import * as Device from 'expo-device';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
-import { Platform, StyleSheet, TextInput } from 'react-native';
+import { Platform, ScrollView, StyleSheet, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -58,13 +58,16 @@ export default function HomeScreen() {
           autoCorrect={false}
         />
 
-        {results.map((word) => (
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+          {results.map((word) => (
           <ThemedView key={word.id} type="backgroundElement" style={styles.result}>
             <ThemedText type="title">{word.simplified}</ThemedText>
             <ThemedText>{word.pinyin}</ThemedText>
             <ThemedText>{word.definition}</ThemedText>
           </ThemedView>
-        ))}
+          ))}
+        </ScrollView>
+
 
         {Platform.OS === 'web' && <WebBadge />}
       </SafeAreaView>
@@ -106,6 +109,13 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.two,
     padding: Spacing.three,
     fontSize: 24,
+  },
+  scroll: {
+    alignSelf: 'stretch',
+  },
+  scrollContent: {
+    gap: Spacing.three,
+    paddingBottom: BottomTabInset + Spacing.four,
   },
   result: {
     alignSelf: 'stretch',
